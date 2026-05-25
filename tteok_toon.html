@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>떡들의 모험 - 수학 만화</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: "Nanum Gothic", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+    background: #2b2233;
+    color: #3a2f22;
+    line-height: 1.5;
+  }
+  .book { max-width: 640px; margin: 0 auto; padding: 0 0 60px; }
+
+  /* 표지 */
+  .cover {
+    background: linear-gradient(160deg, #ffd89b 0%, #ff9a8b 50%, #c9a0ff 100%);
+    text-align: center; padding: 70px 20px 80px; color: #fff;
+    position: relative; overflow: hidden;
+  }
+  .cover h1 {
+    font-size: 44px; text-shadow: 3px 3px 0 rgba(150,70,30,.5); margin-bottom: 6px;
+  }
+  .cover .sub { font-size: 18px; opacity: .95; margin-bottom: 26px; }
+  .cover .duo { display: flex; gap: 26px; justify-content: center; }
+  .cover .scroll-tip { margin-top: 30px; font-size: 15px; opacity: .9; animation: bounce 1.6s infinite; }
+  @keyframes bounce { 0%,100%{transform:translateY(0);} 50%{transform:translateY(8px);} }
+
+  /* 만화 패널 */
+  .panel {
+    background: #fff8ec; margin: 0 8px 14px; border-radius: 18px;
+    border: 5px solid #fff; box-shadow: 0 8px 24px rgba(0,0,0,.3);
+    overflow: hidden;
+    opacity: 0; transform: translateY(40px);
+    transition: opacity .6s ease, transform .6s ease;
+  }
+  .panel.show { opacity: 1; transform: translateY(0); }
+  .panel:first-of-type { margin-top: 14px; }
+
+  .num { font-size: 13px; color: #b08a5a; font-weight: bold; padding: 8px 16px 0; }
+  .caption {
+    background: #fff3d6; border-left: 5px solid #f4b942;
+    margin: 8px 12px; padding: 8px 12px; font-size: 15px; border-radius: 0 8px 8px 0;
+    color: #6b5237;
+  }
+
+  /* 장면(그림) 영역 */
+  .art {
+    position: relative; min-height: 150px; padding: 18px 14px 22px;
+    display: flex; flex-direction: column; align-items: center; gap: 12px;
+  }
+  .art.bg-shop   { background: linear-gradient(#ffe9c2,#ffd2a6); }
+  .art.bg-desk   { background: linear-gradient(#d9ecff,#bcd6ff); }
+  .art.bg-edge   { background: linear-gradient(#cfe8ff,#a7c4ee); }
+  .art.bg-puddle { background: linear-gradient(#cdeede,#9fd9c0); }
+  .art.bg-dog    { background: linear-gradient(#ffe2c2,#ffc999); }
+  .art.bg-mouse  { background: linear-gradient(#e7dcff,#cdb8ff); }
+  .art.bg-cat    { background: linear-gradient(#ffd9e0,#ffb3c4); }
+  .art.bg-balloon{ background: linear-gradient(#d3f0ff,#a7dcff); }
+  .art.bg-bird   { background: linear-gradient(#d6f3ff,#bfe9ff); }
+  .art.bg-win    { background: linear-gradient(#fff4c2,#ffe07a); }
+
+  .row { display: flex; align-items: flex-end; justify-content: center; gap: 18px; flex-wrap: wrap; }
+
+  /* 떡 캐릭터 */
+  .char { text-align: center; animation: sway 3s ease-in-out infinite; }
+  .char .tag { font-size: 12px; font-weight: bold; color: #6b5a44; margin-top: 3px; }
+  @keyframes sway { 0%,100%{transform:translateY(0) rotate(-1deg);} 50%{transform:translateY(-6px) rotate(1deg);} }
+
+  .tteok {
+    width: 70px; height: 56px; border-radius: 50% 50% 46% 46%;
+    position: relative; margin: 0 auto;
+    box-shadow: inset 0 -8px 0 rgba(0,0,0,.06), 0 6px 6px rgba(0,0,0,.15);
+  }
+  .tteok.baram  { background: linear-gradient(#fff,#ffe3ef); border: 2px solid #ffc2dc; }
+  .tteok.butter { background: linear-gradient(#fff6cf,#ffd86b); border: 2px solid #f3c64b; }
+  .tteok .eyes { position:absolute; top:20px; width:100%; display:flex; justify-content:center; gap:13px; }
+  .tteok .eyes span { width:7px; height:9px; background:#3a2f22; border-radius:50%; }
+  .tteok .mouth { position:absolute; bottom:12px; left:50%; transform:translateX(-50%);
+    width:13px; height:6px; border-bottom:3px solid #c0607a; border-radius:0 0 12px 12px; }
+  .tteok .cheek { position:absolute; top:29px; width:9px; height:6px; background:#ffb0c8; border-radius:50%; opacity:.8;}
+  .tteok .cheek.l{left:10px;} .tteok .cheek.r{right:10px;}
+  /* 표정 변형 */
+  .tteok.scared .eyes span { height:11px; width:9px; }
+  .tteok.scared .mouth { width:14px; height:14px; border:3px solid #c0607a; border-radius:50%; }
+  .tteok.happy .mouth { width:18px; height:9px; border-bottom:4px solid #c0607a; }
+
+  .critter { font-size: 60px; text-align: center; animation: sway 3s ease-in-out infinite; filter: drop-shadow(0 5px 4px rgba(0,0,0,.2)); }
+  .critter .tag { font-size: 12px; font-weight: bold; color: #6b5a44; display:block; }
+  .prop { font-size: 46px; }
+
+  /* 말풍선 */
+  .bubbles { display: flex; flex-direction: column; gap: 8px; width: 100%; }
+  .bubble {
+    max-width: 88%; padding: 10px 14px; font-size: 15px; border-radius: 16px;
+    position: relative; box-shadow: 0 3px 0 rgba(0,0,0,.08);
+  }
+  .bubble b { font-weight: 800; }
+  .bubble.baram  { background:#fff; border:3px solid #ffc2dc; align-self:flex-start; }
+  .bubble.baram::before  { content:"바람떡"; }
+  .bubble.butter { background:#fffbe8; border:3px solid #f3c64b; align-self:flex-start; }
+  .bubble.butter::before { content:"버터떡"; }
+  .bubble.enemy  { background:#efe4ff; border:3px solid #c9a0ff; align-self:flex-end; }
+  .bubble.baram::before, .bubble.butter::before, .bubble.enemy::before {
+    display:block; font-size:11px; font-weight:800; color:#9a7fc0; margin-bottom:2px;
+  }
+  .bubble.baram::before { color:#e87fa8; }
+  .bubble.butter::before { color:#c79a2b; }
+  .calc {
+    display:inline-block; background:#fff3d6; border:2px dashed #f4b942;
+    border-radius:8px; padding:2px 8px; margin-top:4px; font-weight:800; color:#b5651d;
+  }
+
+  .end {
+    text-align:center; color:#fff; padding:40px 20px 50px;
+    background: linear-gradient(160deg,#ffd89b,#ff9a8b);
+  }
+  .end h2 { font-size:30px; text-shadow:2px 2px 0 rgba(150,70,30,.4); }
+  .end p { margin-top:10px; font-size:16px; }
+  .end a {
+    display:inline-block; margin-top:22px; background:#fff; color:#d2691e;
+    text-decoration:none; font-weight:800; padding:12px 26px; border-radius:30px;
+    box-shadow:0 5px 0 rgba(150,70,30,.35);
+  }
+</style>
+</head>
+<body>
+<div class="book">
+
+  <!-- 표지 -->
+  <div class="cover">
+    <h1>🍡 떡들의 모험 🍡</h1>
+    <div class="sub">수학으로 위기를 헤쳐나가는 두 떡 이야기</div>
+    <div class="duo">
+      <div class="char"><div class="tteok baram happy"><div class="eyes"><span></span><span></span></div><div class="cheek l"></div><div class="cheek r"></div><div class="mouth"></div></div><div class="tag">바람떡</div></div>
+      <div class="char"><div class="tteok butter happy"><div class="eyes"><span></span><span></span></div><div class="cheek l"></div><div class="cheek r"></div><div class="mouth"></div></div><div class="tag">버터떡</div></div>
+    </div>
+    <div class="scroll-tip">아래로 스크롤하며 읽어요 ↓</div>
+  </div>
+
+  <!-- 패널들이 여기에 생성됨 -->
+  <div id="panels"></div>
+
+  <!-- 끝 -->
+  <div class="end">
+    <h2>🌈 끝 🌈</h2>
+    <p>수학은 위기에서도 우리를 구해주는 멋진 친구랍니다!</p>
+    <a href="떡들의모험.html">🎮 퀴즈 게임으로 풀어보기</a>
+  </div>
+
+</div>
+
+<script>
+const B  = `<div class="char"><div class="tteok baram"><div class="eyes"><span></span><span></span></div><div class="cheek l"></div><div class="cheek r"></div><div class="mouth"></div></div><div class="tag">바람떡</div></div>`;
+const T  = `<div class="char"><div class="tteok butter"><div class="eyes"><span></span><span></span></div><div class="cheek l"></div><div class="cheek r"></div><div class="mouth"></div></div><div class="tag">버터떡</div></div>`;
+const Bs = `<div class="char"><div class="tteok baram scared"><div class="eyes"><span></span><span></span></div><div class="cheek l"></div><div class="cheek r"></div><div class="mouth"></div></div><div class="tag">바람떡</div></div>`;
+const Ts = `<div class="char"><div class="tteok butter scared"><div class="eyes"><span></span><span></span></div><div class="cheek l"></div><div class="cheek r"></div><div class="mouth"></div></div><div class="tag">버터떡</div></div>`;
+const Bh = `<div class="char"><div class="tteok baram happy"><div class="eyes"><span></span><span></span></div><div class="cheek l"></div><div class="cheek r"></div><div class="mouth"></div></div><div class="tag">바람떡</div></div>`;
+const Th = `<div class="char"><div class="tteok butter happy"><div class="eyes"><span></span><span></span></div><div class="cheek l"></div><div class="cheek r"></div><div class="mouth"></div></div><div class="tag">버터떡</div></div>`;
+const critter = (e, n) => `<div class="critter">${e}<span class="tag">${n}</span></div>`;
+
+const scenes = [
+  { bg:"shop",
+    caption:"옛날 어느 떡집에 바람떡과 버터떡이 살고 있었어요.",
+    row: B + critter("🏪","떡집") + T,
+    bubbles:[] },
+
+  { bg:"shop",
+    caption:"어느 날, 두 떡은 함께 팔려 어떤 집에 도착했어요.",
+    row: critter("🧑‍🍳","주인") + B + T,
+    bubbles:[ ["enemy","자, 이제 이 떡들을 구워서 먹어 볼까?"] ] },
+
+  { bg:"desk",
+    caption:"깜짝 놀란 떡들은 도망치기로 했어요!",
+    row: Bs + Ts,
+    bubbles:[ ["baram","큰일이야! 우리 지금 당장 <b>도망치자!</b>"], ["butter","그래! 후다닥—!"] ] },
+
+  { bg:"edge",
+    caption:"한참 달렸지만 책상 끝 모서리에 다다랐어요. 더 갈 곳이 없어요!",
+    row: Bs + critter("📏","책상 끝") + Ts,
+    bubbles:[ ["butter","으악, 여기서 떨어지면 끝장이야!"] ] },
+
+  { bg:"edge",
+    caption:"바람떡이 나무젓가락을 발견했어요. 사다리를 만들 수 있을까?",
+    row: B + critter("🥢","젓가락") + T,
+    bubbles:[
+      ["baram","저 젓가락으로 사다리를 만들자!"],
+      ["butter","그건 너무 짧아! 젓가락은 <b>9cm</b>, 책상 높이는 <b>72cm</b>야."],
+      ["baram","걱정 마! <span class='calc'>72 ÷ 9 = 8</span> 젓가락 <b>8개</b>면 충분해!"]
+    ] },
+
+  { bg:"puddle",
+    caption:"사다리를 타고 내려오니, 이번엔 커다란 웅덩이가 나타났어요.",
+    row: Bs + critter("🕳️","웅덩이") + Ts,
+    bubbles:[
+      ["butter","안 돼! 우린 이제 망했어…"],
+      ["baram","괜찮아, 블록으로 다리를 놓으면 돼!"],
+      ["butter","블록은 <b>3cm</b>고 웅덩이는 <b>18cm</b>나 되는데?"],
+      ["baram","<span class='calc'>18 ÷ 3 = 6</span> 블록 <b>6개</b>면 다리 완성!"]
+    ] },
+
+  { bg:"dog",
+    caption:"다리를 건너자, 배고픈 강아지가 나타났어요!",
+    row: B + critter("🐶","강아지") + T,
+    bubbles:[
+      ["enemy","오, 맛있는 떡이군! 먹어야지!"],
+      ["baram","제발 먹지 마세요! 문제를 풀어드릴게요!"],
+      ["enemy","좋아. 뼈다귀가 <b>18개</b> 있었는데 <b>7개</b>를 더 받았어. 모두 몇 개?"],
+      ["butter","<span class='calc'>18 + 7 = 25</span> 정답은 <b>25개</b>!"]
+    ] },
+
+  { bg:"dog",
+    caption:"강아지는 깜짝 놀라 길을 비켜줬어요.",
+    row: Bh + critter("🐶💢","강아지") + Th,
+    bubbles:[ ["enemy","대단한걸… 너희는 지나가도 좋아."] ] },
+
+  { bg:"mouse",
+    caption:"이번엔 생쥐가 떡들을 가로막았어요!",
+    row: B + critter("🐭","생쥐") + T,
+    bubbles:[
+      ["enemy","오! 맛있는 떡이군."],
+      ["butter","우릴 먹지 않으면 문제를 풀어드릴게요."],
+      ["enemy","치즈가 <b>21개</b> 있었는데 <b>9개</b>를 먹었어. 몇 개 남았는지 <b>두 가지 방법</b>으로 말해봐."],
+      ["butter","21에서 1씩 거꾸로 세거나, 수 모형 21개에서 9개를 덜어내면… <span class='calc'>21 − 9 = 12</span> <b>12개</b>!"]
+    ] },
+
+  { bg:"cat",
+    caption:"창문으로 가려고 책상에 오르는데, 무서운 고양이가 나타났어요!",
+    row: Bs + critter("🐱","고양이") + Ts,
+    bubbles:[
+      ["enemy","내 문제를 못 맞추면 너희를 먹어버리겠어!"],
+      ["baram","문제가 뭔데?"],
+      ["enemy","물고기 <b>14마리</b>를 잡았는데, 한 마리에 뼈가 <b>10개</b>씩 있어. 뼈는 모두 몇 개?"],
+      ["baram","<span class='calc'>14 × 10 = 140</span> 14에 0을 붙이면 끝! <b>140개</b>!"]
+    ] },
+
+  { bg:"balloon",
+    caption:"책상 위에 올랐지만 창문이 너무 높아요. 풍선을 타고 올라가기로 했어요.",
+    row: B + critter("🎈","풍선") + T,
+    bubbles:[
+      ["baram","저 풍선을 타고 올라가자!"],
+      ["butter","풍선 하나는 <b>0.2kg</b>까지만 들어. 나는 <b>0.8kg</b>, 너는 <b>0.6kg</b>이잖아."],
+      ["baram","<span class='calc'>0.2 × 4 = 0.8 / 0.2 × 3 = 0.6</span> 그러니까 <b>모두 7개</b> 필요해!"]
+    ] },
+
+  { bg:"balloon",
+    caption:"풍선을 타고 책상 위로 둥실! 하지만 그만 풍선을 놓아버렸어요.",
+    row: Bs + critter("🎈🎈","둥실~") + Ts,
+    bubbles:[ ["butter","앗, 창문 밖으로 갈 방법이 없어졌어… 풍선을 놓지 말걸!"] ] },
+
+  { bg:"bird",
+    caption:"그때 창밖의 새가 보였어요. 떡들이 도움을 청했어요.",
+    row: B + critter("🐦","새") + T,
+    bubbles:[
+      ["baram","새야, 우릴 좀 꺼내줘!"],
+      ["enemy","내 문제를 맞추면 꺼내줄게. <b>이등변삼각형</b>의 꼭지각이 <b>72°</b>야. 한 밑각은 몇 도?"],
+      ["baram","삼각형 세 각의 합은 180°! <span class='calc'>(180 − 72) ÷ 2 = 54</span> 한 밑각은 <b>54°</b>!"]
+    ] },
+
+  { bg:"win",
+    caption:"새도 떡들의 똑똑함에 깜짝! 두 떡은 마침내 창문 밖으로 무사히 탈출했어요!",
+    row: Bh + critter("🪟","자유!") + Th,
+    bubbles:[ ["baram","우리가 해냈어!"], ["butter","수학 덕분이야! 🎉"] ] }
+];
+
+const wrap = document.getElementById('panels');
+scenes.forEach((s, i) => {
+  const bub = s.bubbles.map(([who, txt]) =>
+    `<div class="bubble ${who}">${txt}</div>`).join('');
+  const html = `
+    <section class="panel">
+      <div class="num">컷 ${i + 1}</div>
+      <div class="caption">${s.caption}</div>
+      <div class="art bg-${s.bg}">
+        <div class="row">${s.row}</div>
+        ${bub ? `<div class="bubbles">${bub}</div>` : ''}
+      </div>
+    </section>`;
+  wrap.insertAdjacentHTML('beforeend', html);
+});
+
+// 스크롤하면 패널이 부드럽게 등장
+const io = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('show'); });
+}, { threshold: 0.15 });
+document.querySelectorAll('.panel').forEach(p => io.observe(p));
+</script>
+</body>
+</html>
